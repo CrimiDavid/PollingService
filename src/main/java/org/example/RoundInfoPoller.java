@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class RoundInfoPoller extends AbstractPoller {
     private final int eventId;
 
-    public RoundInfoPoller(ConnectBasicExample client, ScheduledExecutorService scheduler, int eventId, int pollIntervalSeconds) {
+    public RoundInfoPoller(Connections client, ScheduledExecutorService scheduler, int eventId, int pollIntervalSeconds) {
         super(client, scheduler, pollIntervalSeconds);
         this.eventId = eventId;
     }
@@ -14,12 +14,12 @@ public class RoundInfoPoller extends AbstractPoller {
     @Override
     public void run() {
         try {
-            Optional<Integer> fightIdOpt = ConnectBasicExample.FightId.get();
+            Optional<Integer> fightIdOpt = Connections.FightId.get();
             if (fightIdOpt.isEmpty()) {
                 // No fight ID available, wait for next cycle
                 return;
             }
-            sendToRedis("RoundInfo", client.testEndpoint3(eventId));
+            sendToRedis("RoundInfo", client.getRoundInfoEndpoint(eventId));
         } catch (Exception e) {
             e.printStackTrace();
         }

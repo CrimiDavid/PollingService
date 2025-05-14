@@ -7,12 +7,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractPoller implements Runnable {
-    protected final ConnectBasicExample client;
+    protected final Connections client;
     protected final ScheduledExecutorService scheduler;
     protected final int pollIntervalSeconds;
     protected ScheduledFuture<?> scheduledFuture;  // Track the scheduled task
 
-    protected AbstractPoller(ConnectBasicExample client, ScheduledExecutorService scheduler, int pollIntervalSeconds) {
+    protected AbstractPoller(Connections client, ScheduledExecutorService scheduler, int pollIntervalSeconds) {
         this.client = client;
         this.scheduler = scheduler;
         this.pollIntervalSeconds = pollIntervalSeconds;

@@ -5,7 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class Main {
     public static void main(String[] args) {
-        ConnectBasicExample client = new ConnectBasicExample();
+        Connections client = new Connections();
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
         EventInfoPoller eventInfoPoller = new EventInfoPoller(client, scheduler, 5);

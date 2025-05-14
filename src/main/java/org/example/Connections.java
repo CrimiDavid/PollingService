@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ConnectBasicExample {
+public class Connections {
     public static AtomicReference<Optional<Integer>> EventId = new AtomicReference<>(Optional.empty());
     public static AtomicReference<Optional<String>> EventStatus = new AtomicReference<>(Optional.empty());
     public static AtomicReference<Optional<Integer>> FightId = new AtomicReference<>(Optional.empty());
@@ -53,7 +53,7 @@ public class ConnectBasicExample {
 
 
 
-    public JSONObject testEndpoint() throws IOException, InterruptedException {
+    public JSONObject currentEventEndpoint() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8000/info/get-current-event"))
@@ -85,7 +85,7 @@ public class ConnectBasicExample {
         return json;
     }
 
-    public JSONObject testEndpoint2(int eventId) throws IOException, InterruptedException {
+    public JSONObject getFightEndPoint(int eventId) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8000/info/get-fight?event_id=" + eventId))
@@ -106,7 +106,7 @@ public class ConnectBasicExample {
         return json;
     }
 
-    public JSONObject testEndpoint3(int eventId) throws IOException, InterruptedException {
+    public JSONObject getRoundInfoEndpoint(int eventId) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8000/info/get-round-info?event_id=" + eventId))
@@ -118,7 +118,7 @@ public class ConnectBasicExample {
         return new JSONObject(res.body());
     }
 
-    public JSONObject testEndpoint4(int fightId) throws IOException, InterruptedException {
+    public JSONObject getVotesDataEndpoint(int fightId) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8000/voting/get-votes-data?fight_id="+fightId))

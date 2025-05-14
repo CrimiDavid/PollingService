@@ -12,7 +12,7 @@ public class FightInfoPoller extends AbstractPoller {
     private final AtomicReference<RoundInfoPoller> roundPollerRef = new AtomicReference<>(null);
     private final AtomicReference<VotesDataPoller> votesPollerRef = new AtomicReference<>(null);
 
-    public FightInfoPoller(ConnectBasicExample client, ScheduledExecutorService scheduler, int pollIntervalSeconds) {
+    public FightInfoPoller(Connections client, ScheduledExecutorService scheduler, int pollIntervalSeconds) {
         super(client, scheduler, pollIntervalSeconds);
     }
 
@@ -20,21 +20,21 @@ public class FightInfoPoller extends AbstractPoller {
     public void run() {
         try {
             // Check if we should even be running
-            Optional<String> eventStatusOpt = ConnectBasicExample.EventStatus.get();
+            Optional<String> eventStatusOpt = Connections.EventStatus.get();
             if (eventStatusOpt.isPresent() && eventStatusOpt.get().equals("Final")) {
                 // Event is over, stop this poller and its children
                 stopAllPollers();
                 return;
             }
 
-            Optional<Integer> eventIdOpt = ConnectBasicExample.EventId.get();
+            Optional<Integer> eventIdOpt = Connections.EventId.get();
             if (eventIdOpt.isEmpty()) return;
 
             int eventId = eventIdOpt.get();
-            JSONObject fightInfo = client.testEndpoint2(eventId);
+            JSONObject fightInfo = client.getFightEndPoint(eventId);
             sendToRedis("FightInfo", fightInfo);
 
-            Optional<Integer> fightIdOpt = ConnectBasicExample.FightId.get();
+            Optional<Integer> fightIdOpt = Connections.FightId.get();
             if (fightIdOpt.isPresent()) {
                 int fightId = fightIdOpt.get();
 
