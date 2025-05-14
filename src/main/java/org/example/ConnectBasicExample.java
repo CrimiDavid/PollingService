@@ -1,20 +1,15 @@
 package org.example;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONObject;
-import redis.clients.jedis.UnifiedJedis;
-import redis.clients.jedis.DefaultJedisClientConfig;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisClientConfig;
-import redis.clients.jedis.json.Path2;
+import redis.clients.jedis.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.channels.ServerSocketChannel;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ConnectBasicExample {
@@ -22,21 +17,41 @@ public class ConnectBasicExample {
     public static AtomicReference<Optional<String>> EventStatus = new AtomicReference<>(Optional.empty());
     public static AtomicReference<Optional<Integer>> FightId = new AtomicReference<>(Optional.empty());
 
-    private JSONObject test;
-    private JedisClientConfig config;
-    private UnifiedJedis jedis;
+    // Singleton pattern for JedisPool
+    private static final JedisPool jedisPool;
 
-    public ConnectBasicExample() {
-        config = DefaultJedisClientConfig.builder()
-                .user("default")
-                .password("v9QrT2nzxM0qDAv6Mw2RjTj2WNoqAP43")
-                .build();
+    static {
+        // Initialize JedisPool at class loading time
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        // Set maximum connections
+        poolConfig.setMaxTotal(20);
+        // Set maximum idle connections
+        poolConfig.setMaxIdle(5);
+        // Set minimum idle connections
+        poolConfig.setMinIdle(1);
+        // Set whether or not to test connections on borrow
+        poolConfig.setTestOnBorrow(true);
+        // Set maximum wait time for a connection (milliseconds)
+        poolConfig.setMaxWaitMillis(30000);
+        Dotenv dotenv = Dotenv.load(); // Loads from .env
 
-        jedis = new UnifiedJedis(
-                new HostAndPort("redis-19041.c14.us-east-1-2.ec2.redns.redis-cloud.com", 19041),
-                config
+        // Create the pool with the config, host, port, and auth info
+        jedisPool = new JedisPool(
+                poolConfig,
+                dotenv.get("REDIS_HOST"),
+                Integer.parseInt(dotenv.get("REDIS_PORT")),
+                30000,
+                dotenv.get("REDIS_PASSWORD"),
+                true // SSL enabled (required by Upstash)
         );
     }
+
+    // Get a Jedis instance from the pool
+    private Jedis getJedisFromPool() {
+        return jedisPool.getResource();
+    }
+
+
 
     public JSONObject testEndpoint() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
@@ -116,12 +131,28 @@ public class ConnectBasicExample {
         return new JSONObject(res.body());
     }
 
-    public void run(String key, JSONObject json) {
-        try {
-            jedis.jsonSet(key, json);
+    public void sendToRedis(String key, JSONObject json) {
+        // Use try-with-resources to ensure proper resource cleanup
+        try (Jedis jedis = getJedisFromPool()) {
+            jedis.set(key, String.valueOf(json));
         } catch (Exception e) {
-            jedis.close();
             e.printStackTrace();
+        }
+    }
+
+    public String getFromRedis(String key) {
+        try (Jedis jedis = getJedisFromPool()) {
+            return jedis.get(key);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Cleanup method to close the pool when your application shuts down
+    public static void closePool() {
+        if (jedisPool != null && !jedisPool.isClosed()) {
+            jedisPool.close();
         }
     }
 }
