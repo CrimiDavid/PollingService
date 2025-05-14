@@ -14,17 +14,11 @@ public class RoundInfoPoller extends AbstractPoller {
     @Override
     public void run() {
         try {
-            // Check if the event is still live before polling
-            Optional<String> eventStatusOpt = ConnectBasicExample.EventStatus.get();
-            if (eventStatusOpt.isEmpty() || eventStatusOpt.get().equals("Final")) {
-                // Event is over or status unknown, stop polling
-                System.out.println("Round poller stopping: Event status is " +
-                        (eventStatusOpt.isPresent() ? eventStatusOpt.get() : "unknown"));
-                stopPolling();
+            Optional<Integer> fightIdOpt = ConnectBasicExample.FightId.get();
+            if (fightIdOpt.isEmpty()) {
+                // No fight ID available, wait for next cycle
                 return;
             }
-
-            // Continue with the polling operation if event is still active
             sendToRedis("RoundInfo", client.testEndpoint3(eventId));
         } catch (Exception e) {
             e.printStackTrace();

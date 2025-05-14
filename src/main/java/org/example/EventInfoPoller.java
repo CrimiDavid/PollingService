@@ -37,8 +37,7 @@ public class EventInfoPoller extends AbstractPoller {
                         fightPollerRef.set(fightPoller);
                         fightPoller.startPolling();
                     }
-                }
-                else if (status.equals("Final")) {
+                } else{
                     // Stop the FightInfoPoller if it was started
                     if (fightPollerStarted.compareAndSet(true, false)) {
                         FightInfoPoller fightPoller = fightPollerRef.getAndSet(null);
@@ -48,7 +47,6 @@ public class EventInfoPoller extends AbstractPoller {
                         }
                     }
                 }
-                // Other statuses like "Upcoming" don't need special handling
             }
         } catch (Exception e) {
             e.printStackTrace();
