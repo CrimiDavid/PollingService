@@ -95,8 +95,8 @@ public class Connections {
 
         JSONObject json = new JSONObject(res.body());
         if (res.statusCode() == 200) {
-            if (!json.isNull("fightId")) {
-                FightId.set(Optional.of(json.getInt("fightId")));
+            if (!json.isNull("currentFight")) {
+                FightId.set(Optional.of(json.getInt("currentFight")));
             } else {
                 FightId.set(Optional.empty());
             }
