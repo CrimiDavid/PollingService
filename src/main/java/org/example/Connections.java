@@ -112,7 +112,7 @@ public class Connections {
     public void sendToRedis(String key, JSONObject json) {
         try (Jedis jedis = getJedisFromPool()) {
             jedis.set(key, json.toString());
-            jedis.publish("notifications", json.toString());
+            jedis.publish(key, json.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

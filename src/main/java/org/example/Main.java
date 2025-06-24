@@ -8,7 +8,7 @@ public class Main {
         Connections client = new Connections();
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
-        EventInfoPoller eventInfoPoller = new EventInfoPoller(client, scheduler, 5);
+        EventInfoPoller eventInfoPoller = new EventInfoPoller(client, scheduler, 3600);
         eventInfoPoller.startPolling();
 
     }
